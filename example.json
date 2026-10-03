@@ -1,0 +1,130 @@
+{
+  "info": {
+    "name": "Blog Backend - Author API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "authorId",
+      "value": ""
+    },
+    {
+      "key": "authorToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Register author",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "name", "value": "Sam", "type": "text" },
+            { "key": "lastName", "value": "Example", "type": "text" },
+            { "key": "email", "value": "sam@example.com", "type": "text" },
+            { "key": "about", "value": "Author bio", "type": "text" },
+            { "key": "password", "value": "Pass123!", "type": "text" },
+            { "key": "image", "type": "file", "src": [] }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Author/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["Author", "register"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const author = pm.response.json();",
+              "  if (author._id) pm.collectionVariables.set('authorId', author._id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"sam@example.com\",\n  \"password\": \"Pass123!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Author/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["Author", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const result = pm.response.json();",
+              "  if (result.myToken) pm.collectionVariables.set('authorToken', result.myToken);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get author by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Author/getById/{{authorId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Author", "getById", "{{authorId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete author",
+      "request": {
+        "method": "DELETE",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{authorToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Author/delete/{{authorId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Author", "delete", "{{authorId}}"]
+        }
+      }
+    }
+  ]
+}
