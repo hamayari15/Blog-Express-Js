@@ -3,25 +3,38 @@ const mongoose = require('mongoose')
 const article = mongoose.model('article', {
 
     title: {
-        type: String
+        type: String,
+        required: true,
+        trim: true
     },
     idAuthor: {
-        type: String
+        type: String,
+        required: true
     },
     description: {
-        type: String
+        type: String,
+        required: true,
+        trim: true
     },
     date: {
-        type: String
+        type: Date,
+        required: true
     },
     content: {
-        type: String
+        type: String,
+        required: true,
+        trim: true
     },
     image: {
         type: String
     },
     tags: {
-        type: Array
+        type: [String],
+        required: true,
+        validate: {
+            validator: tags => Array.isArray(tags) && tags.length > 0,
+            message: 'At least one tag is required'
+        }
     }
 })
 

@@ -1,23 +1,38 @@
 const Article = require('../models/Article.js')
 const { getFileName, resetFileName } = require('../middelwares/upload.js')
 
+const normalizeTags = tags => {
+    if (typeof tags === 'string') {
+        return tags.split(',').map(tag => tag.trim()).filter(Boolean)
+    }
+
+    if (Array.isArray(tags)) {
+        return tags.map(tag => String(tag).trim()).filter(Boolean)
+    }
+
+    return tags
+}
+
 const addArticle = (req, res) => {
-    let Data = req.body
-    let Art = new Article(Data)
+    const data = req.body || {}
+    const article = new Article(data)
 
-    Art.idAuthor = req.author._id
+    article.idAuthor = req.author._id
 
-    Art.date = new Date()
-    Art.image = getFileName()
-    Art.tags = Data.tags.split(',')
+    article.date = new Date()
+    article.image = getFileName()
+    article.tags = normalizeTags(data.tags)
 
-    Art.save()
+    article.save()
         .then((savedArticle) => {
             resetFileName()
             res.status(200).send(savedArticle)
         })
         .catch((err) => {
             resetFileName()
+            if (err.name === 'ValidationError' || err.name === 'CastError') {
+                return res.status(400).send(err.message)
+            }
             res.status(500).send(err)
         })
 }
@@ -63,7 +78,7 @@ const getArticlesByAuthor = (req, res) => {
 
 const updateArticle = (req, res) => {
     let id = req.params.id
-    let newData = req.body
+    let newData = req.body || {}
 
     Article.findById(id)
         .then((article) => {
@@ -78,8 +93,8 @@ const updateArticle = (req, res) => {
                 )
             }
 
-            if (newData.tags) {
-                newData.tags = newData.tags.split(',')
+            if (Object.prototype.hasOwnProperty.call(newData, 'tags')) {
+                newData.tags = normalizeTags(newData.tags)
             }
 
             if (getFileName().length > 0) {
@@ -89,7 +104,7 @@ const updateArticle = (req, res) => {
             return Article.findByIdAndUpdate(
                 id,
                 newData,
-                { new: true }
+                { new: true, runValidators: true }
             )
         })
         .then((updatedArticle) => {
@@ -103,6 +118,9 @@ const updateArticle = (req, res) => {
         })
         .catch((err) => {
             resetFileName()
+            if (err.name === 'ValidationError' || err.name === 'CastError') {
+                return res.status(400).send(err.message)
+            }
             res.status(500).send(err)
         })
 }

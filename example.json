@@ -19,6 +19,10 @@
     {
       "key": "articleId",
       "value": ""
+    },
+    {
+      "key": "testEmail",
+      "value": ""
     }
   ],
   "auth": {
@@ -31,6 +35,31 @@
       }
     ]
   },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.info.requestName === 'Register author') {",
+          "  const testEmail = `sam+${pm.variables.replaceIn('{{$guid}}')}@example.com`;",
+          "  pm.collectionVariables.set('testEmail', testEmail);",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(`${pm.info.requestName} succeeds`, function () {",
+          "  pm.response.to.have.status(200);",
+          "});"
+        ]
+      }
+    }
+  ],
   "item": [
     {
       "name": "Register author",
@@ -45,7 +74,7 @@
           "formdata": [
             { "key": "name", "value": "Sam", "type": "text" },
             { "key": "lastName", "value": "Example", "type": "text" },
-            { "key": "email", "value": "sam@example.com", "type": "text" },
+            { "key": "email", "value": "{{testEmail}}", "type": "text" },
             { "key": "about", "value": "Author bio", "type": "text" },
             { "key": "password", "value": "Pass123!", "type": "text" },
             { "key": "image", "type": "file", "src": [] }
@@ -64,7 +93,8 @@
             "exec": [
               "if (pm.response.code === 200) {",
               "  const author = pm.response.json();",
-              "  if (author._id) pm.collectionVariables.set('authorId', author._id);",
+              "  pm.expect(author._id).to.be.ok;",
+              "  pm.collectionVariables.set('authorId', author._id);",
               "}"
             ],
             "type": "text/javascript"
@@ -84,7 +114,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"sam@example.com\",\n  \"password\": \"Pass123!\"\n}",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"Pass123!\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -104,7 +134,8 @@
             "exec": [
               "if (pm.response.code === 200) {",
               "  const result = pm.response.json();",
-              "  if (result.myToken) pm.collectionVariables.set('authorToken', result.myToken);",
+              "  pm.expect(result.myToken).to.be.ok;",
+              "  pm.collectionVariables.set('authorToken', result.myToken);",
               "}"
             ],
             "type": "text/javascript"
@@ -121,7 +152,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"Postman test article\",\n  \"idAuthor\": \"{{authorId}}\",\n  \"description\": \"Article created from Postman\",\n  \"content\": \"Example article content\",\n  \"tags\": \"testing,postman\"\n}",
+          "raw": "{\n  \"title\": \"Postman test article\",\n  \"description\": \"Article created from Postman\",\n  \"content\": \"Example article content\",\n  \"tags\": \"testing,postman\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -141,7 +172,8 @@
             "exec": [
               "if (pm.response.code === 200) {",
               "  const article = pm.response.json();",
-              "  if (article._id) pm.collectionVariables.set('articleId', article._id);",
+              "  pm.expect(article._id).to.be.ok;",
+              "  pm.collectionVariables.set('articleId', article._id);",
               "}"
             ],
             "type": "text/javascript"
@@ -194,7 +226,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"Updated Postman test article\",\n  \"idAuthor\": \"{{authorId}}\",\n  \"description\": \"Updated article description\",\n  \"content\": \"Updated example article content\",\n  \"tags\": \"testing,updated\"\n}",
+          "raw": "{\n  \"title\": \"Updated Postman test article\",\n  \"description\": \"Updated article description\",\n  \"content\": \"Updated example article content\",\n  \"tags\": \"testing,updated\"\n}",
           "options": {
             "raw": {
               "language": "json"
