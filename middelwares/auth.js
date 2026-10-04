@@ -10,7 +10,7 @@ const auth = (req, res, next) => {
 	const token = authorization.split(' ')[1]
 
 	try {
-		req.author = jwt.verify(token, '123456')
+		req.author = jwt.verify(token, process.env.SECRET_KEY)
 		next()
 	} catch (err) {
 		return res.status(401).send('Invalid or expired token')

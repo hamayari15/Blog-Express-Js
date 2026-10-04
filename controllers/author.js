@@ -38,7 +38,7 @@ const loginAuthor = (req, res) => {
                 fullName: author.name + ' ' + author.lastName
             }
 
-            let token = jwt.sign(peyload, '123456')
+            let token = jwt.sign(peyload, process.env.SECRET_KEY)
             res.status(200).send({ myToken: token })
         }
     })

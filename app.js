@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 require('./config/database.js')
 
@@ -13,6 +14,8 @@ app.use('/Article', ArticleRoute)
 app.use('/Author', AuthorRoute)
 
 
-app.listen(3000, () => {
-    console.log("Server work on port 3000")
+const port = Number(process.env.PORT) || 3000
+
+app.listen(port, () => {
+    console.log(`Server work on port ${port}`)
 })
