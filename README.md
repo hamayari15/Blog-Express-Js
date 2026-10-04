@@ -55,6 +55,15 @@ Requests with a missing, invalid, or expired token receive a `401 Unauthorized` 
 
 Images are handled with Multer and saved to the `/Uploads` directory. Send them as `multipart/form-data` using the `image` field.
 
+## Testing with Postman
+
+A ready-to-use Postman collection is included in the `postman/` folder.
+
+1. Open Postman and click **Import**.
+2. Select `postman/blog-backend.postman_collection.json`.
+3. Set the `baseUrl` collection variable if your server does not run on `http://localhost:3000`.
+4. Run the collection (**Run collection**). The requests run in order and save `authorId`, `authorToken` and `articleId` automatically.
+
 ## Project Structure
 
 ```
@@ -62,11 +71,12 @@ Images are handled with Multer and saved to the `/Uploads` directory. Send them 
 ├── controllers/     # Route handlers (article, author)
 ├── middelwares/     # Auth and upload middleware
 ├── models/          # Database models
+├── postman/         # Postman collection for testing the API
+│   └── blog-backend.postman_collection.json
 ├── routes/          # Express routers (article, author)
 ├── Uploads/         # Uploaded images
 ├── .gitignore       # Git ignore rules
 ├── app.js           # App entry point
-├── example.json     # Postman collection for testing the API
 └── package.json     # Dependencies and scripts
 ```
 
