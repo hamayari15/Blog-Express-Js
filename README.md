@@ -1,4 +1,4 @@
-# Blog API
+# Blog Backend
 
 A RESTful blog API built with Node.js and Express. Authors can register, log in, and manage their articles through JWT-protected routes, with support for image uploads via Multer.
 
@@ -64,7 +64,9 @@ Images are handled with Multer and saved to the `/Uploads` directory. Send them 
 ├── models/          # Database models
 ├── routes/          # Express routers (article, author)
 ├── Uploads/         # Uploaded images
+├── .gitignore       # Git ignore rules
 ├── app.js           # App entry point
+├── example.json     # Postman collection for testing the API
 └── package.json     # Dependencies and scripts
 ```
 
