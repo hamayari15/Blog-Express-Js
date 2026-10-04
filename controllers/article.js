@@ -1,5 +1,4 @@
 const Article = require('../models/Article.js')
-const { getFileName, resetFileName } = require('../middelwares/upload.js')
 
 const normalizeTags = tags => {
     if (typeof tags === 'string') {
@@ -13,29 +12,39 @@ const normalizeTags = tags => {
     return tags
 }
 
+const pickArticleFields = body => {
+    const allowed = ['title', 'description', 'content', 'tags']
+    const picked = {}
+    for (const key of allowed) {
+        if (Object.prototype.hasOwnProperty.call(body, key)) {
+            picked[key] = body[key]
+        }
+    }
+    return picked
+}
+
+
 const addArticle = (req, res) => {
-    const data = req.body || {}
+    const data = pickArticleFields(req.body || {})
     const article = new Article(data)
 
     article.idAuthor = req.author._id
-
     article.date = new Date()
-    article.image = getFileName()
+    article.image = req.uploadedFileName || ''
     article.tags = normalizeTags(data.tags)
 
     article.save()
         .then((savedArticle) => {
-            resetFileName()
             res.status(200).send(savedArticle)
         })
         .catch((err) => {
-            resetFileName()
             if (err.name === 'ValidationError' || err.name === 'CastError') {
                 return res.status(400).send(err.message)
             }
             res.status(500).send(err)
         })
 }
+
 
 const getAllArticles = (req, res) => {
     Article.find()
@@ -47,22 +56,22 @@ const getAllArticles = (req, res) => {
         })
 }
 
+
 const getArticleById = (req, res) => {
     let id = req.params.id
 
     Article.findOne({ _id: id })
         .then((article) => {
-
             if (!article) {
                 return res.status(404).send('Article not found')
             }
-
             res.status(200).send(article)
         })
         .catch((err) => {
             res.status(500).send(err)
         })
 }
+
 
 const getArticlesByAuthor = (req, res) => {
     let id = req.params.id
@@ -76,13 +85,13 @@ const getArticlesByAuthor = (req, res) => {
         })
 }
 
+
 const updateArticle = (req, res) => {
     let id = req.params.id
-    let newData = req.body || {}
+    let newData = pickArticleFields(req.body || {})
 
     Article.findById(id)
         .then((article) => {
-
             if (!article) {
                 return res.status(404).send('Article not found')
             }
@@ -97,27 +106,19 @@ const updateArticle = (req, res) => {
                 newData.tags = normalizeTags(newData.tags)
             }
 
-            if (getFileName().length > 0) {
-                newData.image = getFileName()
+            if (req.uploadedFileName) {
+                newData.image = req.uploadedFileName
             }
 
             return Article.findByIdAndUpdate(
                 id,
                 newData,
                 { new: true, runValidators: true }
-            )
-        })
-        .then((updatedArticle) => {
-
-            if (!updatedArticle) {
-                return
-            }
-
-            resetFileName()
-            res.status(200).send(updatedArticle)
+            ).then((updatedArticle) => {
+                res.status(200).send(updatedArticle)
+            })
         })
         .catch((err) => {
-            resetFileName()
             if (err.name === 'ValidationError' || err.name === 'CastError') {
                 return res.status(400).send(err.message)
             }
@@ -125,37 +126,31 @@ const updateArticle = (req, res) => {
         })
 }
 
+
 const deleteArticle = (req, res) => {
     let id = req.params.id
 
     Article.findById(id)
         .then((article) => {
-
             if (!article) {
                 return res.status(404).send('Article not found')
             }
 
-            // Authorization
             if (article.idAuthor.toString() !== req.author._id) {
                 return res.status(403).send(
                     'You are not allowed to delete this article'
                 )
             }
 
-            return Article.findByIdAndDelete(id)
-        })
-        .then((deletedArticle) => {
-
-            if (!deletedArticle) {
-                return
-            }
-
-            res.status(200).send(deletedArticle)
+            return Article.findByIdAndDelete(id).then((deletedArticle) => {
+                res.status(200).send(deletedArticle)
+            })
         })
         .catch((err) => {
             res.status(500).send(err)
         })
 }
+
 
 module.exports = {
     addArticle,

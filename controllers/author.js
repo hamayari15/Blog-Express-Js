@@ -1,16 +1,20 @@
 const Author = require('../models/Author')
 const Bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { getFileName, resetFileName } = require('../middelwares/upload.js')
+
+const sanitizeAuthor = author => {
+    const { password, ...safe } = author.toObject()
+    return safe
+}
+
 
 const registerAuthor = (req, res) => {
     const data = req.body || {}
     const author = new Author(data)
-    author.image = getFileName()
+    author.image = req.uploadedFileName || ''
 
     const validationError = author.validateSync()
     if (validationError) {
-        resetFileName()
         return res.status(400).send(validationError.message)
     }
 
@@ -19,11 +23,9 @@ const registerAuthor = (req, res) => {
 
     author.save()
         .then((savedAuthor) => {
-            resetFileName()
-            res.status(200).send(savedAuthor)
+            res.status(200).send(sanitizeAuthor(savedAuthor))
         })
         .catch((err) => {
-            resetFileName()
             if (err.code === 11000) {
                 return res.status(409).send('Email already registered')
             }
@@ -33,6 +35,7 @@ const registerAuthor = (req, res) => {
             res.status(500).send(err)
         })
 }
+
 
 const loginAuthor = (req, res) => {
     const data = req.body || {}
@@ -52,13 +55,14 @@ const loginAuthor = (req, res) => {
                 fullName: `${author.name} ${author.lastName}`
             }
 
-            const token = jwt.sign(payload, process.env.SECRET_KEY)
+            const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '7d' })
             res.status(200).send({ myToken: token })
         })
         .catch((err) => {
             res.status(500).send(err)
         })
 }
+
 
 const getAuthorById = (req, res) => {
     const id = req.params.id
@@ -71,13 +75,14 @@ const getAuthorById = (req, res) => {
             if (!author) {
                 return res.status(404).send('Author not found')
             }
-            res.status(200).send(author)
+            res.status(200).send(sanitizeAuthor(author))
         })
         .catch((err) => {
             const status = err.name === 'CastError' ? 400 : 500
             res.status(status).send(err.message)
         })
 }
+
 
 const deleteAuthor = (req, res) => {
     const id = req.params.id
@@ -90,7 +95,7 @@ const deleteAuthor = (req, res) => {
             if (!deletedAuthor) {
                 return res.status(404).send('Author not found')
             }
-            res.status(200).send(deletedAuthor)
+            res.status(200).send(sanitizeAuthor(deletedAuthor))
         })
         .catch((err) => {
             const status = err.name === 'CastError' ? 400 : 500

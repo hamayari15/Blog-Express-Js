@@ -1,26 +1,15 @@
 const multer = require('multer')
 
-let fileName = ''
-
 const myStorage = multer.diskStorage({
     destination: './Uploads',
-    filename: (req, file, redirect) => {
-        let date = Date.now()
-        let fl = date + '.' + file.mimetype.split('/')[1]
-        redirect(null, fl)
-        fileName = fl
+    filename: (req, file, cb) => {
+        const ext = file.mimetype.split('/')[1]
+        const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`
+        req.uploadedFileName = name
+        cb(null, name)
     }
 })
 
 const upload = multer({ storage: myStorage })
 
-const getFileName = () => fileName
-const resetFileName = () => {
-    fileName = ''
-}
-
-module.exports = {
-    upload,
-    getFileName,
-    resetFileName
-}
+module.exports = { upload }
