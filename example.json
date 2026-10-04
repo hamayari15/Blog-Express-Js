@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Blog Backend - Author API",
+    "name": "Blog Backend API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -15,13 +15,30 @@
     {
       "key": "authorToken",
       "value": ""
+    },
+    {
+      "key": "articleId",
+      "value": ""
     }
   ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authorToken}}",
+        "type": "string"
+      }
+    ]
+  },
   "item": [
     {
       "name": "Register author",
       "request": {
         "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
         "header": [],
         "body": {
           "mode": "formdata",
@@ -59,6 +76,9 @@
       "name": "Login",
       "request": {
         "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
         "header": [
           { "key": "Content-Type", "value": "application/json" }
         ],
@@ -91,6 +111,114 @@
           }
         }
       ]
+    },
+    {
+      "name": "Add article",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Postman test article\",\n  \"idAuthor\": \"{{authorId}}\",\n  \"description\": \"Article created from Postman\",\n  \"content\": \"Example article content\",\n  \"tags\": \"testing,postman\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Article/Add",
+          "host": ["{{baseUrl}}"],
+          "path": ["Article", "Add"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const article = pm.response.json();",
+              "  if (article._id) pm.collectionVariables.set('articleId', article._id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get all articles",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Article/getAll",
+          "host": ["{{baseUrl}}"],
+          "path": ["Article", "getAll"]
+        }
+      }
+    },
+    {
+      "name": "Get article by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Article/getById/{{articleId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Article", "getById", "{{articleId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get articles by author ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Article/getByIdAuthor/{{authorId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Article", "getByIdAuthor", "{{authorId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update article",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Postman test article\",\n  \"idAuthor\": \"{{authorId}}\",\n  \"description\": \"Updated article description\",\n  \"content\": \"Updated example article content\",\n  \"tags\": \"testing,updated\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Article/update/{{articleId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Article", "update", "{{articleId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete article",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Article/delete/{{articleId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Article", "delete", "{{articleId}}"]
+        }
+      }
     },
     {
       "name": "Get author by ID",

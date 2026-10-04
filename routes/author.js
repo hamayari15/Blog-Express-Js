@@ -12,7 +12,7 @@ const {
 
 Router.post('/register', upload.single('image'), registerAuthor)
 Router.post('/login', loginAuthor)
-Router.get('/getById/:id', auth, getAuthorById)
+Router.get('/getById/:id', getAuthorById)
 Router.delete('/delete/:id', auth, deleteAuthor)
 
 module.exports = Router

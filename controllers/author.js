@@ -46,6 +46,9 @@ const loginAuthor = (req, res) => {
 
 const getAuthorById = (req, res) => {
     id = req.params.id
+    if (req.author._id !== id) {
+        return res.status(403).send('You are not allowed to access this account')
+    }
     Author.findOne({ _id: id }).then((Author) => {
         res.status(200).send(Author)
     }).catch((err) => {
@@ -55,6 +58,9 @@ const getAuthorById = (req, res) => {
 
 const deleteAuthor = (req, res) => {
     id = req.params.id
+     if (req.author._id !== id) {
+        return res.status(403).send('You are not allowed to delete this account')
+    }
     Author.findByIdAndDelete({ _id: id }).then((deletedAuthor) => {
         res.status(200).send(deletedAuthor)
     }).catch((err) => {
